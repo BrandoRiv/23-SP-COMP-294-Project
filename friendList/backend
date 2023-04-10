@@ -1,0 +1,74 @@
+
+    /**
+     * Gets a user's friend list and sorts it alphabetically by username.
+     * @param id UserId
+     * @return friendList
+     */
+    @GetMapping(path = "/getFriendsArrayList/{id}", produces = "application/json; charset=UTF-8")
+    @ResponseBody
+    public List<User> getFriendsArrayList(@PathVariable("id") int id) {
+        try {
+            //build string array of userIds
+            String friendList = friendRepository.findByUserId(id).getFriendsList();
+            String[] friendArrayUserId = friendList.split(",");
+
+            //empty User array for friends
+            ArrayList<User> friendListUser = new ArrayList<User>();
+
+            //temp user
+            User tempUser;
+            int tempId;
+
+            //iterate through array of Friend Ids, add each to a List of Users
+            for(String friendId : friendArrayUserId){
+                tempId = Integer.parseInt(friendId);
+                tempUser = userRepository.findByUserId(tempId);
+                friendListUser.add(tempUser);
+            }
+            //sort alphabetically by username
+            Collections.sort(friendListUser, Comparator.comparing(User:: getUsername));
+            return friendListUser;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    /**
+     * Removes a UserId from a user's friend string.
+     * @param userId, friendUserId
+     */
+    @GetMapping(path = "/removeFriend/{userId}/{friendUserId}", produces = "application/json; charset=UTF-8")
+    @ResponseBody
+    public void removeFriend(@PathVariable("userId")int userId, @PathVariable("friendUserId") int friendUserId)
+    {
+        if(friendRepository.existsByUserId(userId))
+        {
+            try {
+                String friendsString = friendRepository.findByUserId(userId).getFriendsList();
+                String friendId = String.valueOf(friendUserId);
+
+                //build friend array list
+                String[] friendsArray = friendsString.split(",");
+                ArrayList<String> friendsArrayList = new ArrayList<String>(
+                        Arrays.asList(friendsArray));
+
+                //remove friend
+                friendsArrayList.remove(friendId);
+
+                //rebuild friend string
+                StringBuilder str = new StringBuilder("");
+                for (String stringUserId : friendsArrayList) {
+                    str.append(stringUserId).append(",");
+                }
+                String newFriendList = str.toString();
+
+                friendRepository.updateFriendsByUserId(userId, newFriendList);
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
