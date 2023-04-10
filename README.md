@@ -1,4 +1,4 @@
-## 23-SP-COMP-294-Project
+## [Link 23-SP-COMP-294-Project](https://github.com/FranklinCSPracticum/2023_W_Team5_Kaitlyn)
 COMP294 was a class designed to push students through the process of group development. Issues and branches were handled on github. I've attached the details of the project. In this repository I've added all the code that I worked on with a bit of details on what they did. At one point the website worked but was disconnected from the database.
 
 # Login page
@@ -22,3 +22,5 @@ In this project the team will build a web application for rating movies and shar
 * Brandon Rivera - Junior Developer
 * Matt Miller - Junior Developer
 * Bushra Clark - Junior Developer
+
+Link to full repo: https://github.com/FranklinCSPracticum/2023_W_Team5_Kaitlyn
