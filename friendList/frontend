@@ -1,0 +1,131 @@
+import "./profile.css"
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import NavBar from '../components/navBar';
+import Edit from "../components/editModal";
+import FriendsSearch from '../components/friendsSearch';
+import trashCan from '../images/trashCan.png'
+
+
+export default function Profile() {
+
+    const globalUser = JSON.parse(localStorage.getItem('globalUser'));
+
+    let MPassword = Masking(globalUser.password);       
+    const [visible, setVisible]=useState(false)
+    const [openModal, setModal]=useState(false)
+
+    function Masking(){
+        return(('' + globalUser.password).slice(0).replace(/./g, '*'));
+    }
+
+    function toggling(){
+        if (!visible){
+            setVisible(true);
+        } else {
+            setVisible(false);
+
+        }
+    }
+
+        
+        const [friendList, setFriendList] = useState([]);
+        useEffect(() => {
+        const url = 'http://localhost:8080/friend/getFriendsArrayList/' + globalUser.userId;
+
+        fetch(url)
+        .then(response => response.json())
+        .then((movies) => {
+            setFriendList(movies);
+        })
+        .catch(error => console.log(`Error: ${error}`));
+        }, [globalUser.userId]);
+
+        const renderFriendList = (friendList) => {
+                return friendList.map(friend => <ul>
+                    <li style={{display:'inline-block', width:'190px', textAlign:'right'}}>{friend.username} <button onClick={() => handleDelete(friend)} className='btn btn-danger'>
+                        <img src={ trashCan } height={100} alt="" style={{height:'20px'}}></img>
+                    </button></li>
+                </ul>);
+        }
+
+
+        async function handleDelete(friend) {
+            const url = 'http://localhost:8080/friend/removeFriend/' + 1 +'/'+ friend.userId;
+            axios
+            .put(url)
+            .then((res) => {
+                if(res.data === false){
+                    alert("Unable to remove " +friend.username+ "from your friend list.");
+                }
+                else {
+                    alert(friend.username+ "was removed from your friend list.");
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+            window.location.reload(false);
+        }
+
+    return(
+        <>
+        <NavBar />
+        <div className="background"></div>
+        <div className="container">
+        <div className="profile">
+            <h1> Profile </h1>
+            <div className="profileWrapper">
+                <div className="profileInfo">
+                        <div className="username">
+                            <label style={{fontSize:'large'}}>Username: </label>
+                            <p>{globalUser.username}</p>
+                        </div>
+                        <div className=" password">
+                            <label style={{fontSize:'large'}}>Password: </label>
+                            {visible?<p>{globalUser.password}</p>:<p>{MPassword}</p>}
+                        </div>
+                </div>
+            
+                <div id="showButton">
+
+                    <button onClick={toggling}>{visible?"hide":"show"}</button>
+                </div>
+            </div>
+            <button id="editButton" onClick={() => {
+                    setModal(true);
+                    }
+                }
+                >Change Password</button>
+
+                {openModal && <Edit 
+                    closeModal={setModal} 
+                    user = {globalUser}/>}
+        </div>
+        <div 
+        className='float-container'
+        style={{
+            marginTop:'50px', 
+            padding:'20px', 
+            borderRadius:'5px', 
+        }}>
+        //display friendsList
+            <div className='float-child' style={{width: '50%', float:'left'}}>
+                <h2 style={{textAlign:'left', borderBottom:'1px solid'}}>Friends List</h2>
+                {renderFriendList(friendList)}
+                <FriendsSearch />
+            </div>
+
+        </div>
+        </div>
+
+        
+        
+        </>
+        
+    )
+
+    
+
+
+}
