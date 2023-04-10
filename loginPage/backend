@@ -1,0 +1,18 @@
+    @GetMapping(path = "/login/{username}/{password}", produces = "application/json; charset=UTF-8")
+    @ResponseBody
+    public Integer login(@PathVariable("username") String username, @PathVariable("password") String password) {
+        try {
+            int newId = 0;
+
+            User userCheck = userRepository.findByUsernameAndPassword(username, password);
+
+            if(userCheck != null && userCheck.getUserId() > 0) {
+                newId  = userCheck.getUserId();
+            }
+
+            return newId;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
