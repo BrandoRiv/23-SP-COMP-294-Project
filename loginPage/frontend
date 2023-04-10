@@ -1,0 +1,111 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+
+export default function Login() {
+  const [username, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const [globalUser, setGlobalUser] = useState('');
+
+
+  useEffect(() => {
+
+    const auth = () => {
+      if (globalUser !== '') {
+        navigate('/home');
+      }
+    };
+
+    localStorage.setItem('globalUser', JSON.stringify(globalUser));
+    
+    auth();
+  }, [globalUser, navigate]);
+
+
+  function handleUsername(event) {
+    setUserName(event.target.value);
+  }
+
+  function handlePassword(event) {
+    setPassword(event.target.value);
+  }
+
+
+  const handleLoginAttempt = async (event) => {
+    event.preventDefault();
+
+    const userToSend = {
+      username: username, 
+      password: password
+    };
+
+    //send login credentials
+    const url = 'http://localhost:8080/user/validateLogin/' + userToSend.username +'/'+ userToSend.password;
+    axios 
+    .get(url)
+    .then((res) => {
+
+      if (res.data.username !== undefined && res.data.password !== undefined) {
+        setGlobalUser(res.data);
+      }
+      else {
+        setErrorMessage('The username or password is incorrect.');
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+
+  }
+
+  const redirect = () => {
+    navigate('/register');
+  };
+
+  return (
+    <>
+    <div className="Login-form-container">
+
+    
+      <form onSubmit={handleLoginAttempt} className="Login-form" >
+
+        <div style={{fontWeight:'bold', fontSize:'30px', textAlign:'center'}}>
+          MovieDB
+        </div>
+
+        <div style={{textAlign:'center'}} >{errorMessage !== "" ? <p>{ errorMessage } </p> : <p></p>} </div>
+        <div className="Login-form-content">
+          
+          <div className="form-group mt-3">
+            <input
+              type="text"
+              onChange={(e) => handleUsername(e)}
+              className="form-control mt-1"
+              placeholder="Username"
+            />
+          </div>
+          <div className="form-group mt-3">
+            <input
+              type="password"
+              onChange={(e) => handlePassword(e)}
+              className="form-control mt-1"
+              placeholder="Password"
+            />
+          </div>
+          <div className="d-grid gap-2 mt-3">
+            <button type="submit" onClick={handleLoginAttempt} className="btn btn-primary">
+              Login
+            </button>
+            <button type="button" onClick={redirect} className="btn btn-primary">
+              Sign Up
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    </>
+  );
+}
